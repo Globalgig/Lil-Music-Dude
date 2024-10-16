@@ -25,16 +25,22 @@ ydl = YoutubeDL(YDL_OPTIONS)
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 voice = None
+
 songQueue = []
 songName = None
+songVolume = 0.3
 
 def checkQueue():
     if len(songQueue) > 0:
-        playFromDownloadedURL(songQueue.pop(0))
+        nextSong = songQueue.pop(0)
+        print(nextSong[1])
+        playFromDownloadedURL(nextSong[0], nextSong[1])
 
-def playFromDownloadedURL(url):
+def playFromDownloadedURL(url, songAnswer):
+    global songName
+    songName = songAnswer
     voice.play(FFmpegPCMAudio(url, **FFMPEG_OPTIONS), after = lambda _: checkQueue())
-    voice.source = PCMVolumeTransformer(voice.source, .03)
+    voice.source = PCMVolumeTransformer(voice.source, songVolume)
     voice.is_playing()
 
 def getURL(url):
@@ -58,15 +64,15 @@ async def queue(ctx, url, answer):
         await ctx.send("Not in voice channel yet!")
         return
 
+    # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
+    answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
+
     # Play immediately (nothing in the queue)
-    if not voice.is_playing():
-        global songName
-        # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
-        songName = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
-        playFromDownloadedURL(getURL(url))
+    if not voice.is_playing(): 
+        playFromDownloadedURL(getURL(url), answer)
     else:
         await ctx.send("Adding to queue!")
-        songQueue.append(getURL(url))
+        songQueue.append([getURL(url), answer])
         return
 
 @bot.command(name = "guess", aliases = ['g'])
@@ -76,6 +82,10 @@ async def guess(ctx, answer):
     if answer == songName:
         await ctx.send("Correct answer!")
 
+@bot.command(name = "adjustVolume", alias = ['a'])
+async def adjustVolume(_, volume):
+    global songVolume
+    songVolume = volume
 
 # COMMENCE!
 bot.run(TOKEN)
