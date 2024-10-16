@@ -61,7 +61,8 @@ async def queue(ctx, url, answer):
     # Play immediately (nothing in the queue)
     if not voice.is_playing():
         global songName
-        songName = answer
+        # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
+        songName = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
         playFromDownloadedURL(getURL(url))
     else:
         await ctx.send("Adding to queue!")
@@ -70,6 +71,8 @@ async def queue(ctx, url, answer):
 
 @bot.command(name = "guess", aliases = ['g'])
 async def guess(ctx, answer):
+    # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
+    answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
     if answer == songName:
         await ctx.send("Correct answer!")
 
