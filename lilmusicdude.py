@@ -26,6 +26,7 @@ FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconne
 
 voice = None
 songQueue = []
+songName = None
 
 def checkQueue():
     if len(songQueue) > 0:
@@ -52,20 +53,26 @@ async def start(ctx):
 
 
 @bot.command(name = "queue", aliases = ['q'])
-async def queue(ctx, url):
+async def queue(ctx, url, answer):
     if voice is None:
         await ctx.send("Not in voice channel yet!")
         return
 
     # Play immediately (nothing in the queue)
     if not voice.is_playing():
+        global songName
+        songName = answer
         playFromDownloadedURL(getURL(url))
     else:
         await ctx.send("Adding to queue!")
         songQueue.append(getURL(url))
         return
 
-# @client.command(name = "guess", aliases = ['g'])
+@bot.command(name = "guess", aliases = ['g'])
+async def guess(ctx, answer):
+    if answer == songName:
+        await ctx.send("Correct answer!")
+
 
 # COMMENCE!
 bot.run(TOKEN)
