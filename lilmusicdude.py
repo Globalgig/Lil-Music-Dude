@@ -82,6 +82,11 @@ async def guess(ctx, answer):
     if answer == songName:
         await ctx.send("Correct answer!")
 
+@bot.command(name = "join", aliases = ['j'])
+async def join(ctx):
+    if ctx.author.nick not in players:
+        players.append(ctx.author.nick)
+
 @bot.command(name = "adjustVolume", alias = ['a'])
 async def adjustVolume(_, volume):
     global songVolume
