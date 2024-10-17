@@ -107,7 +107,7 @@ async def guess(ctx, answer):
 @bot.command(name = "skip", aliases = ['s'])
 async def skip(ctx):
     voice.skip()
-    
+
 @bot.command(name = "join", aliases = ['j'])
 async def join(ctx):
     if ctx.author.nick not in players:
@@ -115,7 +115,7 @@ async def join(ctx):
     else:
         ctx.send("Player has already joined the session!")
 
-@bot.command(name = "score", aliases = ['s'])
+@bot.command(name = "scoreboard", aliases = ['sb'])
 async def score(ctx):
     # Base column size of the longest player name (TODO: add a minimum s.t. that the score can't exceed player name length)
     maxLength = max(players, lambda x : len(x))
