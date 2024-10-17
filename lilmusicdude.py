@@ -28,17 +28,31 @@ voice = None
 
 songQueue = []
 songName = None
-songVolume = 0.3
+songVolume = 0.03
+
+players = []
+playersQueued = []
+currentSongPlayer = None
+
+def endRound():
+    global playersQueued
+    playersQueued = []
 
 def checkQueue():
     if len(songQueue) > 0:
         nextSong = songQueue.pop(0)
-        print(nextSong[1])
         playFromDownloadedURL(nextSong[0], nextSong[1])
+        return
 
-def playFromDownloadedURL(url, songAnswer):
+    if set(playersQueued) == set(players):
+        endRound()
+        return
+
+def playFromDownloadedURL(url, songAnswer, nick):
     global songName
     songName = songAnswer
+    global currentSongPlayer
+    currentSongPlayer = nick
     voice.play(FFmpegPCMAudio(url, **FFMPEG_OPTIONS), after = lambda _: checkQueue())
     voice.source = PCMVolumeTransformer(voice.source, songVolume)
     voice.is_playing()
@@ -49,10 +63,12 @@ def getURL(url):
     return info['url']
 
 # Add bot to voice channel
-@bot.command(name = "start", aliases = ['s'])
-async def start(ctx):
+@bot.command(name = "begin", aliases = ['b'])
+async def begin(ctx):
     global voice
     if voice is None:
+        global players
+        players = [x.nick for x in ctx.author.voice.channel.members]
         voice = await ctx.author.voice.channel.connect()
     else:
         await ctx.send("Already in a voice channel!")
@@ -64,16 +80,22 @@ async def queue(ctx, url, answer):
         await ctx.send("Not in voice channel yet!")
         return
 
+    if ctx.author.nick in playersQueued:
+        await ctx.send("Already queued this round!")
+        return
+
     # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
     answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
 
     # Play immediately (nothing in the queue)
     if not voice.is_playing(): 
-        playFromDownloadedURL(getURL(url), answer)
+        playFromDownloadedURL(getURL(url), answer, ctx.author.nick)
     else:
         await ctx.send("Adding to queue!")
-        songQueue.append([getURL(url), answer])
-        return
+        songQueue.append([getURL(url), answer, ctx.author.nick])
+    
+    playersQueued.append(ctx.author.nick)
+    return
 
 @bot.command(name = "guess", aliases = ['g'])
 async def guess(ctx, answer):
@@ -81,6 +103,11 @@ async def guess(ctx, answer):
     answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
     if answer == songName:
         await ctx.send("Correct answer!")
+
+@bot.command(name = "skip", aliases = ['s'])
+async def skip(ctx):
+    voice.skip()
+    return
 
 @bot.command(name = "adjustVolume", alias = ['a'])
 async def adjustVolume(_, volume):
