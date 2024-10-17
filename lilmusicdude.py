@@ -44,7 +44,7 @@ def checkQueue():
         playFromDownloadedURL(nextSong[0], nextSong[1])
         return
 
-    if set(playersQueued) == set(players):
+    if set(playersQueued) == set([player[0] for player in players]):
         endRound()
         return
 
@@ -68,7 +68,7 @@ async def begin(ctx):
     global voice
     if voice is None:
         global players
-        players = [x.nick for x in ctx.author.voice.channel.members]
+        players = [[x.nick, 0] for x in ctx.author.voice.channel.members]
         voice = await ctx.author.voice.channel.connect()
     else:
         await ctx.send("Already in a voice channel!")
@@ -106,35 +106,38 @@ async def guess(ctx, answer):
 
 @bot.command(name = "skip", aliases = ['s'])
 async def skip(ctx):
+    #Todo: Implement
+    await ctx.send("Not implemented yet")
+    return
     voice.skip()
 
 @bot.command(name = "join", aliases = ['j'])
 async def join(ctx):
-    if ctx.author.nick not in players:
-        players.append(ctx.author.nick)
+    if ctx.author.nick not in [player[0] for player in players]:
+        players.append([ctx.author.nick, 0])
     else:
         ctx.send("Player has already joined the session!")
 
 @bot.command(name = "scoreboard", aliases = ['sb'])
 async def score(ctx):
     # Base column size of the longest player name (TODO: add a minimum s.t. that the score can't exceed player name length)
-    maxLength = max(players, lambda x : len(x))
+    maxLength = len(max(players, key=lambda x : len(x[0])))
 
     # Formatting of score goes Header, Line, Scores within a markdown block
     header = ""
     line = ""
     scores = ""
     for player in players:
-        header += player + " " * maxLength - len(player) + "| "
-        scores += player + " " * maxLength - len(str(player)) + "| "
+        header += player[0] + " " * (maxLength - len(player[0]) + 1) + "| "
+        scores += str(player[1]) + " " * (maxLength - len(str(player[1])) + 1) + "| "
     header += "\n"
     scores += "\n"
     line = "-" * len(header) + "\n"
 
-    ctx.send("```\n" + header + line + scores + "```")
+    await ctx.send("```\n" + header + line + scores + "```")
     return
 
-@bot.command(name = "adjustVolume", alias = ['a'])
+@bot.command(name = "adjustVolume", alias = ['a', 'av'])
 async def adjustVolume(_, volume):
     global songVolume
     songVolume = volume
