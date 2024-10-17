@@ -86,6 +86,27 @@ async def guess(ctx, answer):
 async def join(ctx):
     if ctx.author.nick not in players:
         players.append(ctx.author.nick)
+    else:
+        ctx.send("Player has already joined the session!")
+
+@bot.command(name = "score", aliases = ['s'])
+async def score(ctx):
+    # Base column size of the longest player name (TODO: add a minimum s.t. that the score can't exceed player name length)
+    maxLength = max(players, lambda x : len(x))
+
+    # Formatting of score goes Header, Line, Scores within a markdown block
+    header = ""
+    line = ""
+    scores = ""
+    for player in players:
+        header += player + " " * maxLength - len(player) + "| "
+        scores += player + " " * maxLength - len(str(player)) + "| "
+    header += "\n"
+    scores += "\n"
+    line = "-" * len(header) + "\n"
+
+    ctx.send("```\n" + header + line + scores + "```")
+    return
 
 @bot.command(name = "adjustVolume", alias = ['a'])
 async def adjustVolume(_, volume):
