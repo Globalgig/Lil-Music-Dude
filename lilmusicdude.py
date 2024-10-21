@@ -28,7 +28,7 @@ voice = None
 
 songQueue = []
 songName = None
-songVolume = 0.03
+songVolume = 0.1
 
 players = []
 playersQueued = []
