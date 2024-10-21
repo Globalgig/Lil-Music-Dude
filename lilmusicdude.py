@@ -41,7 +41,7 @@ def endRound():
 def checkQueue():
     if len(songQueue) > 0:
         nextSong = songQueue.pop(0)
-        playFromDownloadedURL(nextSong[0], nextSong[1])
+        playFromDownloadedURL(nextSong[0], nextSong[1], nextSong[2])
         return
 
     if set(playersQueued) == set([player[0] for player in players]):
@@ -75,9 +75,18 @@ async def begin(ctx):
 
 
 @bot.command(name = "queue", aliases = ['q'])
-async def queue(ctx, url, answer):
+async def queue(ctx, url = None, answer = None):
     if voice is None:
         await ctx.send("Not in voice channel yet!")
+        return
+
+    if url is None:
+        await ctx.send("URL is required to play a song!")
+        return
+
+    if answer is None:
+        # Todo, default answer to the name of the song title
+        await ctx.send("An answer must be provided for the song!")
         return
 
     if ctx.author.nick in playersQueued:
@@ -98,7 +107,11 @@ async def queue(ctx, url, answer):
     return
 
 @bot.command(name = "guess", aliases = ['g'])
-async def guess(ctx, answer):
+async def guess(ctx, answer = None):
+    if answer is None:
+        await ctx.send("An answer is required!")
+        return
+
     # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
     answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
     if answer == songName:
@@ -106,10 +119,11 @@ async def guess(ctx, answer):
 
 @bot.command(name = "skip", aliases = ['s'])
 async def skip(ctx):
-    #Todo: Implement
-    await ctx.send("Not implemented yet")
-    return
-    voice.skip()
+    if voice is None:
+        await ctx.send("Not in voice channel yet!")
+        return
+    else: 
+        voice.stop()
 
 @bot.command(name = "join", aliases = ['j'])
 async def join(ctx):
@@ -137,7 +151,7 @@ async def score(ctx):
     await ctx.send("```\n" + header + line + scores + "```")
     return
 
-@bot.command(name = "adjustVolume", alias = ['a', 'av'])
+@bot.command(name = "adjustVolume", aliases = ['a', 'av'])
 async def adjustVolume(_, volume):
     global songVolume
     songVolume = volume
