@@ -115,12 +115,14 @@ async def guess(ctx, answer = None):
         await ctx.send("An answer is required!")
         return
 
+    if ctx.author.nick not in players.keys():
+        await ctx.send("Player is not currently in game!")
+        return
+
     # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
     answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
     if answer == songName:
-        
-        ctx.author.nick
-
+        players[ctx.author.nick] += 1
         await ctx.send("Correct answer!")
 
 @bot.command(name = "skip", aliases = ['s'])
