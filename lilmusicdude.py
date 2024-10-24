@@ -37,6 +37,7 @@ currentSongPlayer = None
 def endRound():
     global playersQueued
     playersQueued = []
+    return
 
 def checkQueue():
     if len(songQueue) > 0:
@@ -56,6 +57,7 @@ def playFromDownloadedURL(url, songAnswer, nick):
     voice.play(FFmpegPCMAudio(url, **FFMPEG_OPTIONS), after = lambda _: checkQueue())
     voice.source = PCMVolumeTransformer(voice.source, songVolume)
     voice.is_playing()
+    return
 
 def getURL(url):
     with YoutubeDL(YDL_OPTIONS) as ydl:
@@ -73,8 +75,10 @@ async def begin(ctx):
             players[player.nick] = 0
 
         voice = await ctx.author.voice.channel.connect()
+        return
     else:
         await ctx.send("Already in a voice channel!")
+        return
 
 
 @bot.command(name = "queue", aliases = ['q'])
@@ -124,6 +128,8 @@ async def guess(ctx, answer = None):
     if answer == songName:
         players[ctx.author.nick] += 1
         await ctx.send("Correct answer!")
+        return
+    return
 
 @bot.command(name = "skip", aliases = ['s'])
 async def skip(ctx):
@@ -132,13 +138,16 @@ async def skip(ctx):
         return
     else: 
         voice.stop()
+        return
 
 @bot.command(name = "join", aliases = ['j'])
 async def join(ctx):
     if ctx.author.nick not in players.keys():
         players[ctx.author.nick] = 0
+        return
     else:
         ctx.send("Player has already joined the session!")
+        return
 
 @bot.command(name = "scoreboard", aliases = ['sb'])
 async def score(ctx):
@@ -164,6 +173,7 @@ async def score(ctx):
 async def adjustVolume(_, volume):
     global songVolume
     songVolume = volume
+    return
 
 # COMMENCE!
 bot.run(TOKEN)
