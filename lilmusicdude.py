@@ -34,6 +34,8 @@ players = {}
 playersQueued = []
 currentSongPlayer = None
 
+gameMode = False
+
 def endRound():
     global playersQueued
     playersQueued = []
@@ -66,9 +68,17 @@ def getURL(url):
 
 # Add bot to voice channel
 @bot.command(name = "begin", aliases = ['b'])
-async def begin(ctx):
+async def begin(ctx, gMode = False):
     global voice
-    if voice is None:
+    global gameMode
+    gameMode = gMode
+
+    # Start the game in non-game mode
+    if gameMode is False and voice is None:
+        voice = await ctx.author.voice.channel.connect()
+        return
+
+    elif gameMode is True and voice is None:
         # Add all people currently in voice channel to players dictionary with 0 points
         global players
         for player in ctx.author.voice.channel.members:
