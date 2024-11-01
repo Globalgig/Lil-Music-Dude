@@ -162,6 +162,7 @@ async def score(ctx):
     for player in players.items():
         header += player[0] + " " * (maxLength - len(player[0]) + 1) + "| "
         scores += str(player[1]) + " " * (maxLength - len(str(player[1])) + 1) + "| "
+        print(maxLength, str(player[1]))
     header += "\n"
     scores += "\n"
     line = "-" * len(header) + "\n"
@@ -174,6 +175,10 @@ async def adjustVolume(_, volume):
     global songVolume
     songVolume = volume
     return
+
+@bot.command(name = "endRound", aliases = ['e', 'er'])
+async def forceEndRound(ctx):
+    endRound()
 
 # COMMENCE!
 bot.run(TOKEN)
