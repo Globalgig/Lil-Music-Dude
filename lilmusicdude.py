@@ -100,28 +100,41 @@ async def queue(ctx, url = None, answer = None):
     if url is None:
         await ctx.send("URL is required to play a song!")
         return
-
-    if answer is None:
-        # Todo, default answer to the name of the song title
-        await ctx.send("An answer must be provided for the song!")
-        return
-
-    if ctx.author.nick in playersQueued:
-        await ctx.send("Already queued this round!")
-        return
-
-    # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
-    answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
-
-    # Play immediately (nothing in the queue)
-    if not voice.is_playing(): 
-        playFromDownloadedURL(getURL(url), answer, ctx.author.nick)
-    else:
-        await ctx.send("Adding to queue!")
-        songQueue.append([getURL(url), answer, ctx.author.nick])
     
-    playersQueued.append(ctx.author.nick)
-    return
+    # Do not check for answer/queue parameters in non-game mode (since it is free-queue)
+    if gameMode is False:
+        # Play immediately (nothing in the queue)
+        if not voice.is_playing(): 
+            playFromDownloadedURL(getURL(url), "", ctx.author.nick)
+            return
+        else:
+            await ctx.send("Adding to queue!")
+            songQueue.append([getURL(url), "", ctx.author.nick])
+            return
+
+    # Game mode is true
+    else:
+        if answer is None:
+            # Todo, default answer to the name of the song title
+            await ctx.send("An answer must be provided for the song!")
+            return
+
+        if ctx.author.nick in playersQueued:
+            await ctx.send("Already queued this round!")
+            return
+
+        # Sanitize input, removing comma, apostrophe, dash, and parenthesis and casting to lowercase
+        answer = answer.strip().replace(",", "").replace("'", "").replace("-", "").replace("(", "").replace(")", "").lower()
+
+        # Play immediately (nothing in the queue)
+        if not voice.is_playing(): 
+            playFromDownloadedURL(getURL(url), answer, ctx.author.nick)
+        else:
+            await ctx.send("Adding to queue!")
+            songQueue.append([getURL(url), answer, ctx.author.nick])
+        
+        playersQueued.append(ctx.author.nick)
+        return
 
 @bot.command(name = "guess", aliases = ['g'])
 async def guess(ctx, answer = None):
