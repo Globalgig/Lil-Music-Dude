@@ -47,9 +47,11 @@ def checkQueue():
         playFromDownloadedURL(nextSong[0], nextSong[1], nextSong[2])
         return
 
-    if set(playersQueued) == set([player for player in players.keys()]):
-        endRound()
-        return
+    # Only handle round logic when gameMode is true
+    if gameMode is True:
+        if set(playersQueued) == set([player for player in players.keys()]):
+            endRound()
+            return
 
 def playFromDownloadedURL(url, songAnswer, nick):
     global songName
@@ -138,6 +140,11 @@ async def queue(ctx, url = None, answer = None):
 
 @bot.command(name = "guess", aliases = ['g'])
 async def guess(ctx, answer = None):
+    # Do not allow guess-based command in non-game mode
+    if gameMode is False:
+        await ctx.send("Command not available in non-game mode!")
+        return
+
     if answer is None:
         await ctx.send("An answer is required!")
         return
@@ -174,6 +181,11 @@ async def join(ctx):
 
 @bot.command(name = "scoreboard", aliases = ['sb'])
 async def score(ctx):
+    # Do not allow score-based command in non-game mode
+    if gameMode is False:
+        await ctx.send("Command not available in non-game mode!")
+        return
+
     # Base column size of the longest player name (TODO: add a minimum s.t. that the score can't exceed player name length)
     # TODO: Check to see if ctx.author.nick automatically returns string objects as to avoid len(int) issue
     maxLength = len(max(players.keys()))
@@ -201,6 +213,11 @@ async def adjustVolume(_, volume):
 
 @bot.command(name = "endRound", aliases = ['e', 'er'])
 async def forceEndRound(ctx):
+    # Do not allow round-based command in non-game mode
+    if gameMode is False:
+        await ctx.send("Command not available in non-game mode!")
+        return
+    
     endRound()
 
 # COMMENCE!
