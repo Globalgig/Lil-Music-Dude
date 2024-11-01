@@ -73,7 +73,7 @@ def getURL(url):
 async def begin(ctx, gMode = False):
     global voice
     global gameMode
-    gameMode = gMode
+    gameMode = True if gMode.lower() == "t" or gMode.lower() == "true" else False
 
     # Start the game in non-game mode
     if gameMode is False and voice is None:
