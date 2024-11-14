@@ -70,7 +70,7 @@ def getURL(url):
 
 # Add bot to voice channel
 @bot.command(name = "begin", aliases = ['b'])
-async def begin(ctx, gMode = False):
+async def begin(ctx, gMode = "False"):
     global voice
     global gameMode
     gameMode = True if gMode.lower() == "t" or gMode.lower() == "true" else False
